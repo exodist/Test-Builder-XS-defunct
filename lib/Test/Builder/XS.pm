@@ -53,7 +53,7 @@ Chad Granum L<exodist7@gmail.com>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2013 Chad Granum
+Copyright (C) 2014 Chad Granum
 
 Test-Builder-XS is free software; Standard perl license (GPL and Artistic).
 
