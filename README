@@ -1,0 +1,32 @@
+name
+    Test::Builder::XS - XS Enhancement library for Test::Builder
+
+DESCRIPTION
+    Some parts of Test::Builder are very slow in pure perl code. Recent
+    updates to Test::Builder have almost doubled the time it takes for the
+    perl test suite to complete. This module is an attempt to maintain
+    performance without sacrificing capabilities.
+
+EXPORTS
+    $trace = tb_trace()
+        Returns an Test::Builder::Trace object comprised of
+        Test::Builder::Trace::Frame objects. XS is used to build the entire
+        stack trace to ensure performance.
+
+    more to come
+        There are plans to add other XS code as necessary
+
+AUTHORS
+    Chad Granum exodist7@gmail.com
+
+COPYRIGHT
+    Copyright (C) 2013 Chad Granum
+
+    Test-Builder-XS is free software; Standard perl license (GPL and
+    Artistic).
+
+    Test-Builder-XS is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the license for
+    more details.
+
