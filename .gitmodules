@@ -1,0 +1,3 @@
+[submodule "t/TraceTests"]
+	path = t/TraceTests
+	url = git@github.com:Test-More/Test-Builder-TraceTests.git
