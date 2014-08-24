@@ -36,7 +36,7 @@ struct trace_vars {
     AV* transitions;
 
     SV* level;
-    SV* builder;
+    SV* instance;
     SV* todo_message;
     SV* todo_package;
     SV* encoding;
@@ -50,7 +50,7 @@ struct trace_state {
     I32 notb_level;
 
     HV* bldr_pkgs;
-    HV* providers;
+    HV* provided;
 
     SV* anoint_report;
 
@@ -82,7 +82,7 @@ struct trace_details {
 void init_trace_vars(trace_vars *vars) {
     // Is memset, or something equivilent available?
     vars->level        = NULL;
-    vars->builder      = NULL;
+    vars->instance     = NULL;
     vars->todo_message = NULL;
     vars->todo_package = NULL;
     vars->encoding     = NULL;
@@ -101,7 +101,7 @@ void init_trace_state(trace_state *ts) {
     ts->notb_level = 0;
 
     ts->bldr_pkgs = get_hv("Test::Builder::Trace::Frame::BUILDER_PACKAGES", 0);
-    ts->providers = get_hv("Test::Builder::Provider::PROVIDERS", 0);
+    ts->provided = get_hv("Test::Builder::Provider::PROVIDED", 0);
 
     ts->anoint_report = NULL;
 
@@ -155,15 +155,15 @@ void V_tb_anoint_details(trace_details *td) {
         }
     }
 
-    SV** builder_glob = hv_fetch(stash, "TB_INSTANCE", 11, 0);
-    SV*  builder_ref  = builder_glob ? GvSV(*builder_glob) : NULL;
-    if (builder_ref) {
-        hv_store(td->details, "instance", 8, builder_ref, 0);
-        SvREFCNT_inc(builder_ref);
+    SV** instance_glob = hv_fetch(stash, "TB_INSTANCE", 11, 0);
+    SV*  instance_ref  = instance_glob ? GvSV(*instance_glob) : NULL;
+    if (instance_ref) {
+        hv_store(td->details, "instance", 8, instance_ref, 0);
+        SvREFCNT_inc(instance_ref);
 
-        if (!td->vars->builder) {
-            td->vars->builder = builder_ref;
-            SvREFCNT_inc(td->vars->builder);
+        if (!td->vars->instance) {
+            td->vars->instance = instance_ref;
+            SvREFCNT_inc(td->vars->instance);
         }
     }
 
@@ -171,6 +171,11 @@ void V_tb_anoint_details(trace_details *td) {
     SV*  val  = todo ? GvSV(*todo) : NULL;
     if (val) {
         hv_store(td->details, "has_todo", 8, newSVnv(1), 0);
+
+        if (!td->vars->todo_package) {
+            td->vars->todo_package = td->package;
+            SvREFCNT_inc(td->package);
+        }
 
         if (SvOK(val)) {
             SV* copy = newSVsv(val);
@@ -188,7 +193,7 @@ void V_tb_anoint_details(trace_details *td) {
 }
 
 void V_tb_tool_details(trace_details *td) {
-    HE* entry = hv_fetch_ent(td->ts->providers, td->subname, 0, 0);
+    HE* entry = hv_fetch_ent(td->ts->provided, td->subname, 0, 0);
     if (!entry) return;
 
     td->ts->tools++;
@@ -202,7 +207,6 @@ void V_tb_tool_details(trace_details *td) {
 
     av_push(td->vars->tools, td->row);
     SvREFCNT_inc(td->row);
-
 }
 
 void V_tb_trans_details(trace_details *td) {
@@ -383,7 +387,7 @@ SV* S_tb_trace() {
 
     if(vars.level)        hv_store(ret, "level",         5, vars.level,        0);
     if(vars.report)       hv_store(ret, "report",        6, vars.report,       0);
-    if(vars.builder)      hv_store(ret, "builder",       7, vars.builder,      0);
+    if(vars.instance)     hv_store(ret, "instance",      8, vars.instance,     0);
     if(vars.encoding)     hv_store(ret, "encoding",      8, vars.encoding,     0);
     if(vars.todo_message) hv_store(ret, "todo_message", 12, vars.todo_message, 0);
     if(vars.todo_package) hv_store(ret, "todo_package", 12, vars.todo_package, 0);

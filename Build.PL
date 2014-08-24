@@ -20,6 +20,7 @@ my $build = Module::Build->new(
     },
     add_to_cleanup     => ['Test-Builder-*'],
     create_makefile_pl => 'small',
+    recursive_test_files => 1,
     meta_merge         => {
         resources => {
             repository => 'http://github.com/exodist/Test-Builder-XS',
