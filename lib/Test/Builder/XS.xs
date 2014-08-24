@@ -216,6 +216,7 @@ void V_tb_trans_details(trace_details *td) {
     }
 
     td->ts->transition = 0;
+    td->ts->notb_level = 1;
 
     if(!td->details) td->details = newHV();
     hv_store(td->details, "transition", 10, newSVnv(1), 0);
@@ -228,20 +229,25 @@ void V_tb_level_details(trace_details *td) {
     if (!td->ts->seek_level)
         return;
 
-    if (td->ts->notb_level - 1 == td->ts->seek_level)
+    if (td->ts->notb_level != td->ts->seek_level)
         return;
+
+    td->vars->level = td->row;
+    SvREFCNT_inc(td->row);
 
     if (!td->details) td->details = newHV();
     hv_store(td->details, "level", 5, newSVnv(1), 0);
 
-    if (!td->ts->tools)   return;
-    if (td->vars->report) return;
-    if (td->anointed)    return;
+    // This is copied from the PP implementation, but I can no longer remember
+    // what it fixed, disabling for now unless a TB test failed without it.
+    //if (!td->ts->tools)   return;
+    //if (td->vars->report) return;
+    //if (td->anointed)     return;
 
-    hv_store(td->details, "report", 6, newSVnv(1), 0);
+    //hv_store(td->details, "report", 6, newSVnv(1), 0);
 
-    td->vars->report = td->row;
-    SvREFCNT_inc(td->row);
+    //td->vars->report = td->row;
+    //SvREFCNT_inc(td->row);
 }
 
 void V_tb_package_details(trace_details *td) {
@@ -253,6 +259,7 @@ void V_tb_package_details(trace_details *td) {
     if(!td->details) td->details = newHV();
     hv_store(td->details, "builder", 7, newSVnv(1), 0);
     td->ts->transition = 1;
+    td->ts->notb_level = 0;
 }
 
 // }}}
@@ -304,9 +311,12 @@ void V_tb_find_report(trace_vars* vars, trace_state *ts) {
 
     if (toolp && level) {
         // index 4 is stack index
+        SV **tool_depth = av_fetch((AV*)SvRV(*toolp), 4, 0);
+        SV **levl_depth = av_fetch((AV*)SvRV(level),  4, 0);
+        I32 t = SvIV(*tool_depth);
+        I32 l = SvIV(*levl_depth);
+
         // We want the one closest to the bottom (lowest index)
-        I32 t = SvIV(*(av_fetch((AV*)*toolp, 4, 0)));
-        I32 l = SvIV(*(av_fetch((AV*)level,  4, 0)));
         if (l < t) {
             vars->report = level;
         }
