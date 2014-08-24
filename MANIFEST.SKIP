@@ -8,6 +8,7 @@
 \B\.svn\b
 \B\.git\b
 \B\.gitignore\b
+\B\.gitmodules\b
 \b_darcs\b
 \B\.cvsignore$
 
@@ -71,3 +72,9 @@
 
 # Avoid archives of this distribution
 \bTest-Builder-XS-[\d\.\_]+
+
+t/TraceTests/bin
+^\.vimrc$
+\.o$
+\.c$
+
